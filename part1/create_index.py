@@ -31,14 +31,13 @@ def main():
 		obj = json.loads(line)
 		text = obj["text"].encode('utf-8').lower()
 		text = re.sub(r'\W+', ' ', text)
-		bus_id = obj["business_id"].encode('utf-8')
-		rev_id = obj["review_id"].encode('utf-8')
+		bus_id = obj["business_id"].encode('utf-8')	
 		position = 1
 		for word in text.split():
 			if word in stpWord:
 				continue
 			word = stemmer.stem(word, 0, len(word) - 1)
-			data_structure = {"business_id": bus_id, "review_id": rev_id, "position": position}
+			data_structure = ( bus_id, linenum, position)
 			if word not in inv_index:
 				inv_index[word] = [data_structure]
 			else:
@@ -54,21 +53,12 @@ def main():
 			sys.stderr.write("Estimated time remaining: " + str(rm_estimate) + "\n")
 		linenum += 1
 
-
-	"""
-	outName = 'output.json'
-	if opts.outputName is not None:
-		outName = opts.outputName
-	
-	with open(outName, 'w') as fp:	
-		for word in inv_index:
-			json.dump([word] + inv_index[word], fp)
-			fp.write('\n')
+	json.dump(inv_index, sys.stdout)
 	"""
 	for word in inv_index:
 		json.dump([word] + inv_index[word], sys.stdout)
 		print ""
-
+	"""
 
 if __name__ == '__main__':
 	main()

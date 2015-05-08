@@ -12,8 +12,8 @@ def tf_idf(word_dlist, bs_id, tot_n_rev):
 	n_rev = 0
 	revs = set()
 	for r_dict in word_dlist:
-		cur_rev_id = r_dict["review_id"]
-		if r_dict["business_id"] == bs_id: # considers all reviews for specific business as one single review for tf FIXME
+		cur_rev_id = r_dict[1]
+		if r_dict[0] == bs_id: # considers all reviews for specific business as one single review for tf FIXME
 			f_td += 1
 		if cur_rev_id not in revs:
 			revs.add(cur_rev_id)
@@ -36,10 +36,14 @@ def main():
 	index_dict = {}	
 	print "Reading in inverse index file..."	
 
+	index_file = open(opts.indexFile, 'r')
+	index_dict = json.load(index_file)
+	"""
 	with open(opts.indexFile, 'r') as index_file:
 		for line in index_file:
 			data = json.loads(line)
 			index_dict[data[0]] = data[1:]	
+	"""
 
 	bs_dict = {}
 	print "Reading in business file..."
@@ -107,10 +111,10 @@ def main():
 					break
 				for r_dict in index_dict[word]:	
 					if not is_LSQ:
-						wb.add(r_dict["business_id"])
+						wb.add(r_dict[0])
 					else:
-						if bs_dict[r_dict["business_id"]][0] in loc_list:
-							wb.add(r_dict["business_id"])
+						if bs_dict[r_dict[0]][0] in loc_list:
+							wb.add(r_dict[0])
 				final_list.append(wb)
 
 			if final_list == None:
@@ -127,19 +131,19 @@ def main():
 				if it == 1: # First iteration	
 					for r_dict in index_dict[word]:
 						if not is_LSQ:
-							wb[r_dict["business_id"]] = (r_dict["review_id"], r_dict["position"])	
+							wb[r_dict[0]] = (r_dict[1], r_dict[2])	
 						else:
-							if bs_dict[r_dict["business_id"]][0] in loc_list:
-								wb[r_dict["business_id"]] = (r_dict["review_id"], r_dict["position"])
+							if bs_dict[r_dict[0]][0] in loc_list:
+								wb[r_dict[0]] = (r_dict[1], r_dict[2])
 				else: # >= 2nd iteration
 					bs_set = set() # another set to keep track of this iteration
 					for r_dict in index_dict[word]:	
-						bs_id = r_dict["business_id"]
+						bs_id = r_dict[0]
 						if bs_id in wb:
-							if wb[bs_id][0] == r_dict["review_id"]:
-								if (wb[bs_id][1] + 1) == r_dict["position"]:
+							if wb[bs_id][0] == r_dict[1]:
+								if (wb[bs_id][1] + 1) == r_dict[2]:
 									bs_set.add(bs_id)
-									wb[bs_id] = (r_dict["review_id"], r_dict["position"])
+									wb[bs_id] = (r_dict[1], r_dict[2])
 					for bid in (set(wb.keys()) - bs_set): # remove invalid bids
 						wb.pop(bid)
 				it += 1		
