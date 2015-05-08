@@ -1,8 +1,10 @@
+from __future__ import division
 import json
 import argparse
 import porter_stemmer
 import re
 import sys
+import time 
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -11,6 +13,9 @@ def main():
 	#parser.add_argument('-outputName', help='output file name. Default is output.json')
 	opts = parser.parse_args()
 
+	tot_line = 1000
+	blk = 100
+
 	stpWord = set()
 	if opts.stopWord is not None: # add words in stopword file to default list
 		for line in open(opts.stopword, 'r'):
@@ -18,7 +23,10 @@ def main():
 
 	inv_index = {}
 	stemmer = porter_stemmer.PorterStemmer()	
-	
+
+	start_time = time.clock()
+
+	linenum = 1	
 	for line in open(opts.reviewFile, 'r'):
 		obj = json.loads(line)
 		text = obj["text"].encode('utf-8').lower()
@@ -36,6 +44,17 @@ def main():
 			else:
 				inv_index[word].append(data_structure)
 			position += 1		
+	
+		if linenum % blk == 0:
+			end_time = time.clock()
+			elapsed = end_time - start_time
+			rm_estimate = (tot_line/linenum - 1)*elapsed
+			sys.stderr.write("Line " + str(linenum) + " reached\n")
+			sys.stderr.write("Time elapsed: " + str(elapsed)+"\n")
+			sys.stderr.write("Estimated time remaining: " + str(rm_estimate) + "\n")
+		linenum += 1
+
+
 	"""
 	outName = 'output.json'
 	if opts.outputName is not None:
