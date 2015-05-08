@@ -13,12 +13,12 @@ def main():
 	#parser.add_argument('-outputName', help='output file name. Default is output.json')
 	opts = parser.parse_args()
 
-	tot_line = 1000
-	blk = 100
+	tot_line = 1550000
+	blk = 100000
 
 	stpWord = set()
 	if opts.stopWord is not None: # add words in stopword file to default list
-		for line in open(opts.stopword, 'r'):
+		for line in open(opts.stopWord, 'r'):
 			stpWord.add(line.strip())
 
 	inv_index = {}
