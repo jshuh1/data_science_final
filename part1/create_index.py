@@ -53,6 +53,7 @@ def main():
 			sys.stderr.write("Estimated time remaining: " + str(rm_estimate) + "\n")
 		linenum += 1
 
+	sys.stderr.write("Done. Writing inverted index to stdout")
 	json.dump(inv_index, sys.stdout)
 	"""
 	for word in inv_index:
