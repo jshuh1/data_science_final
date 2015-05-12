@@ -9,8 +9,7 @@ import time
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-reviewFile', required=True, help='Path to review data')
-	parser.add_argument('-stopWord', help='Path to newline separated stopword list file. Default is None')
-	#parser.add_argument('-outputName', help='output file name. Default is output.json')
+	parser.add_argument('-stopWord', help='Path to newline separated stopword list file. Default is None')	
 	opts = parser.parse_args()
 
 	tot_line = 1550000
@@ -30,11 +29,11 @@ def main():
 	for line in open(opts.reviewFile, 'r'):
 		obj = json.loads(line)
 		text = obj["text"].encode('utf-8').lower()
-		text = re.sub(r'\W+', ' ', text)
+		text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
 		bus_id = obj["business_id"].encode('utf-8')	
 		position = 1
 		for word in text.split():
-			if word in stpWord:
+			if word in stpWord or len(word) == 1:
 				continue
 			word = stemmer.stem(word, 0, len(word) - 1)
 			data_structure = ( bus_id, linenum, position)
@@ -53,13 +52,14 @@ def main():
 			sys.stderr.write("Estimated time remaining: " + str(rm_estimate) + "\n")
 		linenum += 1
 
-	sys.stderr.write("Done. Writing inverted index to stdout")
-	json.dump(inv_index, sys.stdout)
-	"""
+	sys.stderr.write("Done. Writing inverted index to stdout\n")
+	#json.dump(inv_index, sys.stdout)
+	
+	#Line-by-line dumping for debugging
 	for word in inv_index:
 		json.dump([word] + inv_index[word], sys.stdout)
-		print ""
-	"""
+		print "" 
 
+	
 if __name__ == '__main__':
 	main()

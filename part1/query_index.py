@@ -32,19 +32,22 @@ def main():
 	parser.add_argument('-businessFile', required = True, help = 'path to business json file')
 	parser.add_argument('-stopWord', help = 'path to newline separated stopword list file. Default is None.\n BE SURE TO USE SAME STOPWORD FILE AS IN create_index.py')
 	parser.add_argument('-revNum', required = True, help = 'total number of reviews. You`ll have to get this by running create_index.py first')
-	opts = parser.parse_args()
-	index_dict = {}	
+	opts = parser.parse_args()	
 	print "Reading in inverse index file..."	
 
 	index_file = open(opts.indexFile, 'r')
-	index_dict = json.load(index_file)
-	"""
-	with open(opts.indexFile, 'r') as index_file:
-		for line in index_file:
-			data = json.loads(line)
-			index_dict[data[0]] = data[1:]	
-	"""
+	#index_dict = json.load(index_file)
 
+	#Line-by-line reading for debugging
+	index_dict = {}
+	ln = 1
+	for line in index_file:
+		data = json.loads(line)
+		index_dict[data[0]] = data[1:]
+		if ln % 10000 == 0:
+			print ln
+		ln += 1
+	
 	bs_dict = {}
 	print "Reading in business file..."
 	with open(opts.businessFile, 'r') as business_file:
@@ -161,11 +164,11 @@ def main():
 			score = 0
 			for word in word_list:
 				score += tf_idf(index_dict[word], bs, int(opts.revNum))
-			score = score * math.log(bs_dict[bs][1]) * bs_dict[bs][2]
+			score = score * (math.log(bs_dict[bs][1]) + 1) * bs_dict[bs][2]
 			fin_dict[bs_dict[bs][3]] = score
 
 		ret = sorted(fin_dict.items(), key = operator.itemgetter(1), reverse=True)	
-		n = max(len(ret), 10)
+		n = min(len(ret), 10)
 		print ret[:n]
 
 if __name__ == '__main__':
