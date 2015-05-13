@@ -13,7 +13,7 @@ def tf_idf(word_dlist, bs_id, tot_n_rev):
 	revs = set()
 	for r_dict in word_dlist:
 		cur_rev_id = r_dict[1]
-		if r_dict[0] == bs_id: # considers all reviews for specific business as one single review for tf FIXME
+		if r_dict[0] == bs_id: # considers all reviews for specific business as one single review for tf 
 			f_td += 1
 		if cur_rev_id not in revs:
 			revs.add(cur_rev_id)
@@ -35,8 +35,7 @@ def main():
 	opts = parser.parse_args()	
 	print "Reading in inverse index file..."	
 
-	index_file = open(opts.indexFile, 'r')
-	#index_dict = json.load(index_file)
+	index_file = open(opts.indexFile, 'r')	
 
 	#Line-by-line reading for debugging
 	index_dict = {}
@@ -44,10 +43,12 @@ def main():
 	for line in index_file:
 		data = json.loads(line)
 		index_dict[data[0]] = data[1:]
+		"""
 		if ln % 10000 == 0:
 			print ln
 		ln += 1
-	
+		"""	
+
 	bs_dict = {}
 	print "Reading in business file..."
 	with open(opts.businessFile, 'r') as business_file:
@@ -69,12 +70,15 @@ def main():
 	while 1:
 		usr_input = sys.stdin.readline()
 		if not usr_input:
-			break
+			break	
 		input_list = usr_input.strip().split("IN", 1)
 		#print input_list	
 
 		raw_words = input_list[0].rstrip().lower()
 		is_PQ = 0	
+		if len(raw_words) <= 1:
+			print "No input"
+			continue
 
 		if raw_words[0] == '\"':
 			raw_words = raw_words.strip('\"')
@@ -98,8 +102,8 @@ def main():
 		loc_list = None
 		
 		if is_LSQ:
-			loc_list = input_list[1].lower().split()
-			if not len(loc_list):
+			loc_list = input_list[1].lstrip().lower().split(',')
+			if not len(input_list[1].strip()):
 				print "There has to be at least one city for LSQ"
 				continue
 
@@ -164,7 +168,7 @@ def main():
 			score = 0
 			for word in word_list:
 				score += tf_idf(index_dict[word], bs, int(opts.revNum))
-			score = score * (math.log(bs_dict[bs][1]) + 1) * bs_dict[bs][2]
+			score = score * (math.log(bs_dict[bs][1]) * bs_dict[bs][2] + 50) 
 			fin_dict[bs_dict[bs][3]] = score
 
 		ret = sorted(fin_dict.items(), key = operator.itemgetter(1), reverse=True)	

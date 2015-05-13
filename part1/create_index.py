@@ -13,7 +13,7 @@ def main():
 	opts = parser.parse_args()
 
 	tot_line = 1550000
-	blk = 100000
+	blk = 100000 # hard coded bulk for time calculation
 
 	stpWord = set()
 	if opts.stopWord is not None: # add words in stopword file to default list
@@ -34,7 +34,7 @@ def main():
 		position = 1
 		for word in text.split():
 			if word in stpWord or len(word) == 1:
-				continue
+				continue # skip stopword or word of length 1
 			word = stemmer.stem(word, 0, len(word) - 1)
 			data_structure = ( bus_id, linenum, position)
 			if word not in inv_index:
@@ -52,10 +52,9 @@ def main():
 			sys.stderr.write("Estimated time remaining: " + str(rm_estimate) + "\n")
 		linenum += 1
 
-	sys.stderr.write("Done. Writing inverted index to stdout\n")
-	#json.dump(inv_index, sys.stdout)
+	sys.stderr.write("Done. Writing inverted index to stdout\n")	
 	
-	#Line-by-line dumping for debugging
+	#Line-by-line dumping for the ease of debugging
 	for word in inv_index:
 		json.dump([word] + inv_index[word], sys.stdout)
 		print "" 
